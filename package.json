@@ -1,0 +1,40 @@
+{
+  "name": "nat-api",
+  "version": "0.0.1",
+  "description": "Port mapping with UPnP and NAT-PMP",
+  "main": "index.js",
+  "dependencies": {
+    "nat-pmp": "github:yciabaud/node-nat-pmp#patch-1",
+    "nat-upnp": "^1.1.1",
+    "default-gateway": "^5.0.3",
+    "unordered-array-remove": "^1.0.2"
+  },
+  "devDependencies": {
+    "standard": "^14.3.1"
+  },
+  "scripts": {
+    "test": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alxhotel/nat-api.git"
+  },
+  "keywords": [
+    "nat",
+    "api",
+    "upnp",
+    "pmp",
+    "nat-pmp",
+    "holepunch",
+    "port",
+    "forwarding",
+    "map",
+    "mapping"
+  ],
+  "author": "Alex <alxmorais8@msn.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alxhotel/nat-api/issues"
+  },
+  "homepage": "https://github.com/alxhotel/nat-api#readme"
+}
