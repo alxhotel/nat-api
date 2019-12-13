@@ -102,7 +102,7 @@ Unmap any port that has the public port or private port equal to `publicPort` an
 
 Unmap any port that contains the parameters provided in `opts`.
 
-### `client.destroy()`
+### `client.destroy([callback])`
 
 Destroy the client. Unmaps all the ports open with `nat-api` and cleans up large data structure resources.
 
