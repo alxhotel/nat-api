@@ -111,7 +111,7 @@ Destroy the client. Unmaps all the ports open with `nat-api` and cleans up large
 MIT. Copyright (c) [Alex](https://github.com/alxhotel)
 
 [nat-api-ti]: https://img.shields.io/travis/alxhotel/nat-api/master.svg
-[nat-api-tu]: https://travis-ci.org/alxhotel/nat-api
+[nat-api-tu]: https://travis-ci.com/alxhotel/nat-api
 [nat-api-ni]: https://img.shields.io/npm/v/nat-api.svg
 [nat-api-nu]: https://npmjs.org/package/nat-api
 [nat-api-di]: https://david-dm.org/alxhotel/nat-api.svg
