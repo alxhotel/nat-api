@@ -1,8 +1,8 @@
 const arrayRemove = require('unordered-array-remove')
-const debug = require('debug')('nat-api')
-const natUPNP = require('./lib/upnp')
-const natPMP = require('./lib/pmp')
 const defaultGateway = require('default-gateway')
+const debug = require('debug')('nat-api')
+const NatUPNP = require('./lib/upnp')
+const NatPMP = require('./lib/pmp')
 
 class NatAPI {
   /**
@@ -27,13 +27,13 @@ class NatAPI {
     this._pmpIntervals = {}
 
     // Setup UPnP Client
-    this._upnpClient = natUPNP.createClient()
+    this._upnpClient = NatUPNP.createClient()
 
     // Setup NAT-PMP Client
     try {
       // Lookup gateway IP
       var results = defaultGateway.v4.sync()
-      this._pmpClient = natPMP.connect(results.gateway)
+      this._pmpClient = NatPMP.connect(results.gateway)
     } catch (err) {
       debug('Could not find gateway IP for NAT-PMP', err)
       this._pmpClient = null
@@ -148,7 +148,7 @@ class NatAPI {
       // Close UPNP Client
       if (self._upnpClient) {
         debug('Close UPnP client')
-        self._upnpClient.close()
+        self._upnpClient.destroy()
       }
 
       // Use callback for future versions
@@ -301,7 +301,7 @@ class NatAPI {
 
     // If we come from a timeouted (or error) request, we need to reconnect
     if (self._pmpClient && self._pmpClient.socket == null) {
-      self._pmpClient = natPMP.connect(self._pmpClient.gateway)
+      self._pmpClient = NatPMP.connect(self._pmpClient.gateway)
     }
 
     var timeouted = false
@@ -376,7 +376,7 @@ class NatAPI {
 
     // If we come from a timeouted (or error) request, we need to reconnect
     if (self._pmpClient && self._pmpClient.socket == null) {
-      self._pmpClient = natPMP.connect(self._pmpClient.gateway)
+      self._pmpClient = NatPMP.connect(self._pmpClient.gateway)
     }
 
     var timeouted = false

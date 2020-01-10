@@ -4,10 +4,12 @@
   "description": "Port mapping with UPnP and NAT-PMP",
   "main": "index.js",
   "dependencies": {
+    "async": "^3.1.0",
+    "default-gateway": "^5.0.5",
     "nat-pmp": "github:yciabaud/node-nat-pmp#patch-1",
-    "nat-upnp": "^1.1.1",
-    "default-gateway": "^5.0.3",
-    "unordered-array-remove": "^1.0.2"
+    "request": "^2.88.0",
+    "unordered-array-remove": "^1.0.2",
+    "xml2js": "^0.1.0"
   },
   "devDependencies": {
     "standard": "^14.3.1"
