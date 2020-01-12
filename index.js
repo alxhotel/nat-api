@@ -158,7 +158,7 @@ class NatAPI {
     // Unmap all ports
     var openPortsCopy = Object.assign([], self._openPorts)
     var numPorts = openPortsCopy.length
-    if (numPorts === 0) return cb()
+    if (numPorts === 0) return continueDestroy()
 
     openPortsCopy.forEach(function (openPortObj) {
       self.unmap(openPortObj, function () {
