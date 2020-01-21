@@ -136,12 +136,8 @@ class NatAPI {
 
     if (!cb) cb = noop
 
-console.log('Destroying NAT')
-
     function continueDestroy () {
       self._destroyed = true
-
-console.log('Continue destroying...')
 
       // Close NAT-PMP client
       if (self._pmpClient) {
