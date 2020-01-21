@@ -115,7 +115,6 @@ class NatAPI {
       })
     } else {
       // UDP & TCP
-
       var newOptsUDP = Object.assign({}, opts)
       newOptsUDP.protocol = 'UDP'
       self._unmap(newOptsUDP, function (err) {
@@ -134,10 +133,15 @@ class NatAPI {
   destroy (cb) {
     var self = this
     if (self._destroyed) throw new Error('client already destroyed')
+
     if (!cb) cb = noop
+
+console.log('Destroying NAT')
 
     function continueDestroy () {
       self._destroyed = true
+
+console.log('Continue destroying...')
 
       // Close NAT-PMP client
       if (self._pmpClient) {
@@ -210,7 +214,7 @@ class NatAPI {
   }
 
   _map (opts, cb) {
-    var self = this
+    const self = this
     function tryUPNP () {
       self._upnpMap(opts, function (err) {
         if (err) {
@@ -227,6 +231,8 @@ class NatAPI {
     // Try NAT-PMP
     if (this._pmpClient) {
       this._pmpMap(opts, function (err) {
+        if (self._destroyed) return
+
         // Try UPnP
         if (err) return tryUPNP()
 
@@ -239,7 +245,7 @@ class NatAPI {
   }
 
   _unmap (opts, cb) {
-    var self = this
+    const self = this
     function tryUPNP () {
       self._upnpUnmap(opts, function (err) {
         if (err) {
@@ -256,6 +262,8 @@ class NatAPI {
     // Try NAT-PMP
     if (this._pmpClient) {
       this._pmpUnmap(opts, function (err) {
+        if (self._destroyed) return
+
         // Try UPnP
         if (err) return tryUPNP()
 

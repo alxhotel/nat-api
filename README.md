@@ -106,6 +106,13 @@ Unmap any port that contains the parameters provided in `opts`.
 
 Destroy the client. Unmaps all the ports open with `nat-api` and cleans up large data structure resources.
 
+## Additional Information
+
+- http://miniupnp.free.fr/nat-pmp.html
+- http://wikipedia.org/wiki/NAT_Port_Mapping_Protocol
+- http://tools.ietf.org/html/draft-cheshire-nat-pmp-03
+
+
 ## License
 
 MIT. Copyright (c) [Alex](https://github.com/alxhotel)
