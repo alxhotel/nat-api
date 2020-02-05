@@ -31,7 +31,7 @@ class NatAPI {
     this._upnpClient = NatUPNP.createClient()
 
     // Setup NAT-PMP Client
-    this.enablePMP = !!opts.enablePMP || false
+    this.enablePMP = !!opts.enablePMP
     if (this.enablePMP) {
       try {
         // Lookup gateway IP
