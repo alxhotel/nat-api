@@ -11,6 +11,7 @@ class NatAPI {
   *  - description
   *  - gateway
   *  - autoUpdate
+  *  - enablePMP (default = false)
   **/
   constructor (opts = {}) {
     // TTL is 2 hours (min 20 min)
@@ -30,12 +31,18 @@ class NatAPI {
     this._upnpClient = NatUPNP.createClient()
 
     // Setup NAT-PMP Client
-    try {
-      // Lookup gateway IP
-      var results = defaultGateway.v4.sync()
-      this._pmpClient = NatPMP.connect(results.gateway)
-    } catch (err) {
-      debug('Could not find gateway IP for NAT-PMP', err)
+    this.enablePMP = !!opts.enablePMP || false
+    if (this.enablePMP) {
+      try {
+        // Lookup gateway IP
+        var results = defaultGateway.v4.sync()
+        this._pmpClient = NatPMP.connect(results.gateway)
+      } catch (err) {
+        debug('Could not find gateway IP for NAT-PMP', err)
+        this._pmpClient = null
+      }
+    } else {
+      // Not necessary - but good for readability
       this._pmpClient = null
     }
   }
