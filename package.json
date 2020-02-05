@@ -1,28 +1,4 @@
 {
-  "_from": "nat-api@0.1.2",
-  "_id": "nat-api@0.1.2",
-  "_inBundle": false,
-  "_integrity": "sha512-2m95kLO9aZidHjBgj5E4xUDEfUVUl/Ydx4SUpl/yw07h6f5iO7EJjnj48W8eAE1cI7ibOOolKYsejYsFOgQy4A==",
-  "_location": "/nat-api",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "version",
-    "registry": true,
-    "raw": "nat-api@0.1.2",
-    "name": "nat-api",
-    "escapedName": "nat-api",
-    "rawSpec": "0.1.2",
-    "saveSpec": null,
-    "fetchSpec": "0.1.2"
-  },
-  "_requiredBy": [
-    "#USER",
-    "/"
-  ],
-  "_resolved": "https://registry.npmjs.org/nat-api/-/nat-api-0.1.2.tgz",
-  "_shasum": "a70f4febd2018b2aeaf8d461d250ec24aeebd904",
-  "_spec": "nat-api@0.1.2",
-  "_where": "/home/alex/Documents/Projects/Github/webtorrent",
   "author": {
     "name": "Alex",
     "email": "alxmorais8@msn.com"
@@ -67,5 +43,5 @@
   "scripts": {
     "test": "standard"
   },
-  "version": "0.1.2"
+  "version": "0.1.3"
 }
