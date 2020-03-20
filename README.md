@@ -9,6 +9,8 @@ Fast port mapping with **UPnP** and **NAT-PMP** in NodeJS.
 
 ## Install
 
+**Required: NodeJS >= 10**
+
 ```sh
 npm install nat-api
 ```
