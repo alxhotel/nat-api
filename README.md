@@ -46,6 +46,12 @@ client.unmap(1000, function (err) {
   console.log('Port unmapped!') 
 })
 
+// Get external IP
+client.externalIp(function(err, ip) {
+  if (err) return console.log('Error', err)
+  console.log('External IP:', ip)
+})
+
 // Destroy object
 client.destroy()
 ```
@@ -104,6 +110,11 @@ Unmap any port that has the public port or private port equal to `publicPort` an
 ### `client.unmap(opts, [callback])`
 
 Unmap any port that contains the parameters provided in `opts`.
+
+### `client.externalIp([callback])`
+* `callback(err, ip)`
+
+Get the external IP address.
 
 ### `client.destroy([callback])`
 
