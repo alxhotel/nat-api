@@ -247,6 +247,37 @@ class NatAPI {
     }
   }
 
+  externalIp (cb) {
+    const self = this
+    function tryUPNP () {
+      self._upnpClient.externalIp(function (err, ip) {
+        if (err) {
+          let newErr
+          if (self._pmpClient) newErr = new Error('NAT-PMP and UPnP get external ip failed')
+          else newErr = new Error('UPnP get external failed')
+          return cb(newErr)
+        }
+
+        cb(undefined, ip)
+      })
+    }
+
+    // Try NAT-PMP
+    if (this._pmpClient) {
+      this._pmpClient.externalIp(function (err, ip) {
+        if (self._destroyed) return
+
+        // Try UPnP
+        if (err) return tryUPNP()
+
+        cb(undefined, ip)
+      })
+    } else {
+      // Try UPnP
+      tryUPNP()
+    }
+  }
+
   _unmap (opts, cb) {
     const self = this
     function tryUPNP () {
