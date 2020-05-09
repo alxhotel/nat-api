@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "name": "nat-api",
   "description": "Port mapping with UPnP and NAT-PMP",
   "main": "index.js",
