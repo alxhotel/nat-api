@@ -68,8 +68,8 @@ If `opts` is specified, then the default options (shown below) will be overridde
 {
   ttl: 1200, // Time to live of each port mapping in seconds (default: 1200)
   autoUpdate: true, // Refresh all the port mapping to keep them from expiring (default: true)
-  gateway: '192.168.1.1' // Default gateway (default: null)
-  enablePMP: false // PMP is not enable by default
+  gateway: '192.168.1.1', // Default gateway (default: null)
+  enablePMP: false // Enable PMP (default: false)
 }
 ```
 
