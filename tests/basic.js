@@ -1,6 +1,6 @@
 const NatAPI = require('../')
 
-var client = new NatAPI()
+const client = new NatAPI()
 
 const port = 6690
 

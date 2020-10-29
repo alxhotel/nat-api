@@ -35,7 +35,7 @@ class NatAPI {
     if (this.enablePMP) {
       try {
         // Lookup gateway IP
-        var results = defaultGateway.v4.sync()
+        const results = defaultGateway.v4.sync()
         this._pmpClient = NatPMP.connect(results.gateway)
       } catch (err) {
         debug('Could not find gateway IP for NAT-PMP', err)
@@ -57,30 +57,30 @@ class NatAPI {
   *  - gateway
   **/
   map (publicPort, privatePort, cbParam) {
-    var self = this
+    const self = this
     if (self._destroyed) throw new Error('client is destroyed')
 
     // Validate input
-    var { opts, cb } = self._validateInput(publicPort, privatePort, cbParam)
+    const { opts, cb } = self._validateInput(publicPort, privatePort, cbParam)
 
     if (opts.protocol) {
       // UDP or TCP
       self._map(opts, function (err) {
         if (err) return cb(err)
-        var newOpts = Object.assign({}, opts)
+        const newOpts = Object.assign({}, opts)
         self._openPorts.push(newOpts)
         cb()
       })
     } else {
       // UDP & TCP
-      var newOptsUDP = Object.assign({}, opts)
+      const newOptsUDP = Object.assign({}, opts)
       newOptsUDP.protocol = 'UDP'
       self._map(newOptsUDP, function (err) {
         if (err) return cb(err)
 
         self._openPorts.push(newOptsUDP)
 
-        var newOptsTCP = Object.assign({}, opts)
+        const newOptsTCP = Object.assign({}, opts)
         newOptsTCP.protocol = 'TCP'
         self._map(newOptsTCP, function (err) {
           if (err) return cb(err)
@@ -102,11 +102,11 @@ class NatAPI {
   *  - gateway
   **/
   unmap (publicPort, privatePort, cbParam) {
-    var self = this
+    const self = this
     if (self._destroyed) throw new Error('client is destroyed')
 
     // Validate input
-    var { opts, cb } = self._validateInput(publicPort, privatePort, cbParam)
+    const { opts, cb } = self._validateInput(publicPort, privatePort, cbParam)
 
     arrayRemove(self._openPorts, self._openPorts.findIndex(function (o) {
       return (o.publicPort === opts.publicPort) &&
@@ -122,12 +122,12 @@ class NatAPI {
       })
     } else {
       // UDP & TCP
-      var newOptsUDP = Object.assign({}, opts)
+      const newOptsUDP = Object.assign({}, opts)
       newOptsUDP.protocol = 'UDP'
       self._unmap(newOptsUDP, function (err) {
         if (err) return cb(err)
 
-        var newOptsTCP = Object.assign({}, opts)
+        const newOptsTCP = Object.assign({}, opts)
         newOptsTCP.protocol = 'TCP'
         self._unmap(newOptsTCP, function (err) {
           if (err) return cb(err)
@@ -138,7 +138,7 @@ class NatAPI {
   }
 
   destroy (cb) {
-    var self = this
+    const self = this
     if (self._destroyed) throw new Error('client already destroyed')
 
     if (!cb) cb = noop
@@ -163,8 +163,8 @@ class NatAPI {
     }
 
     // Unmap all ports
-    var openPortsCopy = Object.assign([], self._openPorts)
-    var numPorts = openPortsCopy.length
+    const openPortsCopy = Object.assign([], self._openPorts)
+    let numPorts = openPortsCopy.length
     if (numPorts === 0) return continueDestroy()
 
     openPortsCopy.forEach(function (openPortObj) {
@@ -179,7 +179,7 @@ class NatAPI {
   }
 
   _validateInput (publicPort, privatePort, cb) {
-    var opts
+    let opts
     if (typeof publicPort === 'object') {
       // opts
       opts = publicPort
@@ -221,7 +221,7 @@ class NatAPI {
     function tryUPNP () {
       self._upnpMap(opts, function (err) {
         if (err) {
-          var newErr
+          let newErr
           if (self._pmpClient) newErr = new Error('NAT-PMP and UPnP port mapping failed')
           else newErr = new Error('UPnP port mapping failed')
           return cb(newErr)
@@ -283,7 +283,7 @@ class NatAPI {
     function tryUPNP () {
       self._upnpUnmap(opts, function (err) {
         if (err) {
-          var newErr
+          let newErr
           if (self._pmpClient) newErr = new Error('NAT-PMP and UPnP port mapping failed')
           else newErr = new Error('UPnP port mapping failed')
           return cb(newErr)
@@ -310,7 +310,7 @@ class NatAPI {
   }
 
   _upnpMap (opts, cb) {
-    var self = this
+    const self = this
     debug('Mapping public port %d to private port %d by %s using UPnP', opts.publicPort, opts.privatePort, opts.protocol)
     self._upnpClient.portMapping({
       public: opts.publicPort,
@@ -338,7 +338,7 @@ class NatAPI {
   }
 
   _pmpMap (opts, cb) {
-    var self = this
+    const self = this
     debug('Mapping public port %d to private port %d by %s using NAT-PMP', opts.publicPort, opts.privatePort, opts.protocol)
 
     // If we come from a timeouted (or error) request, we need to reconnect
@@ -346,11 +346,11 @@ class NatAPI {
       self._pmpClient = NatPMP.connect(self._pmpClient.gateway)
     }
 
-    var timeouted = false
-    var pmpTimeout = setTimeout(function () {
+    let timeouted = false
+    const pmpTimeout = setTimeout(function () {
       timeouted = true
       self._pmpClient.close()
-      var err = new Error('timeout')
+      const err = new Error('timeout')
       debug('Error mapping port %d:%d using NAT-PMP:', opts.publicPort, opts.privatePort, err.message)
       cb(err)
     }, 250)
@@ -386,7 +386,7 @@ class NatAPI {
   }
 
   _upnpUnmap (opts, cb) {
-    var self = this
+    const self = this
     debug('Unmapping public port %d to private port %d by %s using UPnP', opts.publicPort, opts.privatePort, opts.protocol)
 
     self._upnpClient.portUnmapping({
@@ -400,7 +400,7 @@ class NatAPI {
       }
 
       // Clear intervals
-      var key = opts.publicPort + ':' + opts.privatePort + '-' + opts.protocol
+      const key = opts.publicPort + ':' + opts.privatePort + '-' + opts.protocol
       if (self._upnpIntervals[key]) {
         clearInterval(self._upnpIntervals[key])
         delete self._upnpIntervals[key]
@@ -413,7 +413,7 @@ class NatAPI {
   }
 
   _pmpUnmap (opts, cb) {
-    var self = this
+    const self = this
     debug('Unmapping public port %d to private port %d by %s using NAT-PMP', opts.publicPort, opts.privatePort, opts.protocol)
 
     // If we come from a timeouted (or error) request, we need to reconnect
@@ -421,11 +421,11 @@ class NatAPI {
       self._pmpClient = NatPMP.connect(self._pmpClient.gateway)
     }
 
-    var timeouted = false
-    var pmpTimeout = setTimeout(function () {
+    let timeouted = false
+    const pmpTimeout = setTimeout(function () {
       timeouted = true
       self._pmpClient.close()
-      var err = new Error('timeout')
+      const err = new Error('timeout')
       debug('Error unmapping port %d:%d using NAT-PMP:', opts.publicPort, opts.privatePort, err.message)
       cb(err)
     }, 250)
@@ -447,7 +447,7 @@ class NatAPI {
       }
 
       // Clear intervals
-      var key = opts.publicPort + ':' + opts.privatePort + '-' + opts.protocol
+      const key = opts.publicPort + ':' + opts.privatePort + '-' + opts.protocol
       if (self._pmpIntervals[key]) {
         clearInterval(self._pmpIntervals[key])
         delete self._pmpIntervals[key]
