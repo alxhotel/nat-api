@@ -326,7 +326,7 @@ class NatAPI {
 
       if (self.autoUpdate) {
         self._upnpIntervals[opts.publicPort + ':' + opts.privatePort + '-' + opts.protocol] = setInterval(
-          self._upnpMap.bind(self, opts),
+          self._upnpMap.bind(self, opts, () => {}),
           self._timeout
         )
       }
@@ -374,7 +374,7 @@ class NatAPI {
 
       if (self.autoUpdate) {
         self._pmpIntervals[opts.publicPort + ':' + opts.privatePort + '-' + opts.protocol] = setInterval(
-          self._pmpMap.bind(self, opts),
+          self._pmpMap.bind(self, opts, () => {}),
           self._timeout
         )
       }
