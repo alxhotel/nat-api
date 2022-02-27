@@ -1,7 +1,14 @@
-const dgram = require('dgram')
-// const assert = require('assert')
-const debug = require('debug')('nat-pmp')
-const EventEmitter = require('events').EventEmitter
+import { createSocket } from 'dgram'
+import { logger } from '@libp2p/logger'
+import { EventEmitter } from 'events'
+import errCode from 'err-code'
+import defer, { DeferredPromise } from 'p-defer'
+import type { Socket, RemoteInfo } from 'dgram'
+import type { Client, MapPortOptions, UnmapPortOptions } from '../index.js'
+import type { Service } from '@achingbrain/ssdp'
+import type { InternetGatewayDevice } from '../upnp/device.js'
+
+const debug = logger('nat-port-mapper:pmp')
 
 // Ports defined by draft
 const CLIENT_PORT = 5350
@@ -14,7 +21,7 @@ const OP_MAP_TCP = 2
 const SERVER_DELTA = 128
 
 // Resulit codes
-const RESULT_CODES = {
+const RESULT_CODES: Record<number, string> = {
   0: 'Success',
   1: 'Unsupported Version',
   2: 'Not Authorized/Refused (gateway may have NAT-PMP disabled)',
@@ -23,31 +30,47 @@ const RESULT_CODES = {
   5: 'Unsupported opcode'
 }
 
-module.exports.connect = function (gateway) {
-  return new Client(gateway)
-  /* process.nextTick(function () {
-    client.connect()
-  }) */
+export interface PortMappingOptions {
+  type?: 'tcp' | 'udp'
+  ttl?: number
+  public?: boolean
+  private?: boolean
+  internal?: boolean
+  external?: boolean
 }
 
-class Client extends EventEmitter {
-  constructor (gateway) {
+export class PMPClient extends EventEmitter implements Client {
+  private readonly socket: Socket
+  private queue: Array<{ op: number, buf: Uint8Array, deferred: DeferredPromise<any> }>
+  private connecting: boolean
+  private listening: boolean
+  private req: any
+  private reqActive: boolean
+  private readonly discoverGateway: () => Promise<Service<InternetGatewayDevice>>
+  private gateway?: string
+
+  static async createClient (discoverGateway: () => Promise<Service<InternetGatewayDevice>>) {
+    return new PMPClient(discoverGateway)
+  }
+
+  constructor (discoverGateway: () => Promise<Service<InternetGatewayDevice>>) {
     super()
 
-    if (!gateway) throw new Error('gateway is not defined')
+    if (discoverGateway == null) {
+      throw new Error('discoverGateway is not defined')
+    }
 
-    this.gateway = gateway
-
-    this._queue = []
-    this._connecting = false
-    this._listening = false
-    this._req = null
-    this._reqActive = false
+    this.discoverGateway = discoverGateway
+    this.queue = []
+    this.connecting = false
+    this.listening = false
+    this.req = null
+    this.reqActive = false
 
     // Create socket
-    this.socket = dgram.createSocket({ type: 'udp4', reuseAddr: true })
+    this.socket = createSocket({ type: 'udp4', reuseAddr: true })
     this.socket.on('listening', () => this.onListening())
-    this.socket.on('message', () => this.onMessage())
+    this.socket.on('message', (msg, rinfo) => this.onMessage(msg, rinfo))
     this.socket.on('close', () => this.onClose())
     this.socket.on('error', (err) => this.onError(err))
 
@@ -57,15 +80,15 @@ class Client extends EventEmitter {
 
   connect () {
     debug('Client#connect()')
-    if (this._connecting) return
-    this._connecting = true
+    if (this.connecting) return
+    this.connecting = true
     this.socket.bind(CLIENT_PORT)
   }
 
-  portMapping (opts, cb) {
+  async map (opts: MapPortOptions) {
     debug('Client#portMapping()')
-    let opcode
-    switch (String(opts.type || 'tcp').toLowerCase()) {
+    let opcode: number
+    switch (String(opts.protocol ?? 'tcp').toLowerCase()) {
       case 'tcp':
         opcode = OP_MAP_TCP
         break
@@ -75,44 +98,60 @@ class Client extends EventEmitter {
       default:
         throw new Error('"type" must be either "tcp" or "udp"')
     }
-    this._request(opcode, opts, cb)
+
+    const gateway = await this.discoverGateway()
+    this.gateway = new URL(gateway.location).host
+
+    const deferred = defer()
+
+    this.request(opcode, opts, deferred)
+
+    await deferred.promise
   }
 
-  portUnmapping (opts, cb) {
+  async unmap (opts: UnmapPortOptions) {
     debug('Client#portUnmapping()')
-    opts.ttl = 0
-    this.portMapping(opts, cb)
+
+    await this.map({
+      ...opts,
+      description: '',
+      localAddress: '',
+      ttl: 0
+    })
   }
 
-  externalIp (cb) {
+  async externalIp () {
     debug('Client#externalIp()')
-    this._request(OP_EXTERNAL_IP, cb)
+
+    const gateway = await this.discoverGateway()
+    this.gateway = new URL(gateway.location).host
+
+    const deferred = defer<string>()
+
+    this.request(OP_EXTERNAL_IP, {}, deferred)
+
+    return await deferred.promise
   }
 
-  close () {
+  async close () {
     debug('Client#close()')
-    if (this.socket) {
+
+    if (this.socket != null) {
       this.socket.close()
     }
-    this.socket = null
 
-    this._queue = []
-    this._connecting = false
-    this._listening = false
-    this._req = null
-    this._reqActive = false
+    this.queue = []
+    this.connecting = false
+    this.listening = false
+    this.req = null
+    this.reqActive = false
   }
 
   /**
    * Queues a UDP request to be send to the gateway device.
    */
 
-  _request (op, obj, cb) {
-    if (typeof obj === 'function') {
-      cb = obj
-      obj = null
-    }
-
+  request (op: number, obj: PortMappingOptions, deferred: DeferredPromise<any>) {
     debug('Client#request()', [op, obj])
 
     let buf
@@ -126,19 +165,21 @@ class Client extends EventEmitter {
     switch (op) {
       case OP_MAP_UDP:
       case OP_MAP_TCP:
-        if (!obj) throw new Error('mapping a port requires an "options" object')
+        if (obj == null) {
+          throw new Error('mapping a port requires an "options" object')
+        }
 
-        internal = +(obj.private || obj.internal || 0)
-        if (internal !== (internal | 0) || internal < 0) {
+        internal = Number(obj.private ?? obj.internal ?? 0)
+        if (internal !== (internal | 0) ?? internal < 0) {
           throw new Error('the "private" port must be a whole integer >= 0')
         }
 
-        external = +(obj.public || obj.external || 0)
-        if (external !== (external | 0) || external < 0) {
+        external = Number(obj.public ?? obj.external ?? 0)
+        if (external !== (external | 0) ?? external < 0) {
           throw new Error('the "public" port must be a whole integer >= 0')
         }
 
-        ttl = +(obj.ttl)
+        ttl = Number(obj.ttl ?? 0)
         if (ttl !== (ttl | 0)) {
           // The RECOMMENDED Port Mapping Lifetime is 7200 seconds (two hours)
           ttl = 7200
@@ -170,12 +211,12 @@ class Client extends EventEmitter {
         pos++
         break
       default:
-        throw new Error('Invalid opcode: ', op)
+        throw new Error(`Invalid opcode: ${op}`)
     }
     // assert.equal(pos, size, 'buffer not fully written!')
 
     // Add it to queue
-    this._queue.push({ buf: buf, cb: cb })
+    this.queue.push({ op, buf: buf, deferred })
 
     // Try to send next message
     this._next()
@@ -188,28 +229,35 @@ class Client extends EventEmitter {
   _next () {
     debug('Client#_next()')
 
-    const req = this._queue[0]
+    const req = this.queue[0]
 
-    if (!req) {
+    if (req == null) {
       debug('_next: nothing to process')
       return
     }
-    if (!this.socket) {
+
+    if (this.socket == null) {
       debug('_next: client is closed')
       return
     }
-    if (!this._listening) {
+
+    if (!this.listening) {
       debug('_next: not "listening" yet, cannot send out request yet')
-      if (!this._connecting) this.connect()
+
+      if (!this.connecting) {
+        this.connect()
+      }
+
       return
     }
-    if (this._reqActive) {
+
+    if (this.reqActive) {
       debug('_next: already an active request so wait...')
       return
     }
 
-    this._reqActive = true
-    this._req = req
+    this.reqActive = true
+    this.req = req
 
     const buf = req.buf
 
@@ -219,41 +267,41 @@ class Client extends EventEmitter {
 
   onListening () {
     debug('Client#onListening()')
-    this._listening = true
-    this._connecting = false
+    this.listening = true
+    this.connecting = false
 
     // Try to send next message
     this._next()
   }
 
-  onMessage (msg, rinfo) {
+  onMessage (msg: Buffer, rinfo: RemoteInfo) {
     // Ignore message if we're not expecting it
-    if (this._queue.length === 0) return
+    if (this.queue.length === 0) {
+      return
+    }
 
     debug('Client#onMessage()', [msg, rinfo])
 
-    const self = this
+    const cb = (err?: Error, parsed?: any) => {
+      this.req = null
+      this.reqActive = false
 
-    function cb (err) {
-      self._req = null
-      self._reqActive = false
-
-      if (err) {
-        if (req.cb) {
-          req.cb.call(self, err)
+      if (err != null) {
+        if (req.deferred != null) {
+          req.deferred.reject(err)
         } else {
-          self.emit('error', err)
+          this.emit('error', err)
         }
-      } else if (req.cb) {
-        req.cb.apply(self, arguments)
+      } else if (req.deferred != null) {
+        req.deferred.resolve(parsed)
       }
 
       // Try to send next message
-      self._next()
+      this._next()
     }
 
-    const req = this._queue[0]
-    const parsed = { msg: msg }
+    const req = this.queue[0]
+    const parsed: any = { msg: msg }
     parsed.vers = msg.readUInt8(0)
     parsed.op = msg.readUInt8(1)
 
@@ -265,23 +313,21 @@ class Client extends EventEmitter {
     // if we got here, then we're gonna invoke the request's callback,
     // so shift this request off of the queue.
     debug('removing "req" off of the queue')
-    this._queue.shift()
+    this.queue.shift()
 
     if (parsed.vers !== 0) {
-      cb(new Error('"vers" must be 0. Got: ' + parsed.vers))
+      cb(new Error(`"vers" must be 0. Got: ${parsed.vers}`)) // eslint-disable-line @typescript-eslint/restrict-template-expressions
       return
     }
 
-    // Xommon fields
+    // Common fields
     parsed.resultCode = msg.readUInt16BE(2)
     parsed.resultMessage = RESULT_CODES[parsed.resultCode]
     parsed.epoch = msg.readUInt32BE(4)
 
     // Error
     if (parsed.resultCode !== 0) {
-      const err = new Error(parsed.resultMessage)
-      err.code = parsed.resultCode
-      return cb(err)
+      return cb(errCode(new Error(parsed.resultMessage), parsed.resultCode))
     }
 
     // Success
@@ -301,33 +347,30 @@ class Client extends EventEmitter {
         parsed.ip.push(msg.readUInt8(11))
         break
       default:
-        return cb(new Error('Unknown opcode: ' + req.op))
+        return cb(new Error(`Unknown opcode: ${req.op}`))
     }
 
-    cb(null, parsed)
+    cb(undefined, parsed)
   }
 
   onClose () {
     debug('Client#onClose()')
-    this._listening = false
-    this._connecting = false
-    this.socket = null
+    this.listening = false
+    this.connecting = false
   }
 
-  onError (err) {
+  onError (err: Error) {
     debug('Client#onError()', [err])
-    if (this._req && this._req.cb) {
-      this._req.cb(err)
+    if (this.req?.cb != null) {
+      this.req.cb(err)
     } else {
       this.emit('error', err)
     }
 
-    if (this.socket) {
+    if (this.socket != null) {
       this.socket.close()
       // Force close - close() does not guarantee to trigger onClose()
       this.onClose()
     }
   }
 }
-
-module.exports.Client = Client
