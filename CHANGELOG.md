@@ -1,3 +1,10 @@
+### [1.0.1](https://github.com/achingbrain/upnp-nat/compare/v1.0.0...v1.0.1) (2022-03-11)
+
+
+### Bug Fixes
+
+* browser shim ([#3](https://github.com/achingbrain/upnp-nat/issues/3)) ([6d095f8](https://github.com/achingbrain/upnp-nat/commit/6d095f84f10e0da1c2f5b1b6a38cbb01eea123ba))
+
 ## 1.0.0 (2022-02-27)
 
 
