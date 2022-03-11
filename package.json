@@ -37,6 +37,7 @@
   ],
   "exports": {
     ".": {
+      "browser": "./dist/src/browser.js",
       "import": "./dist/src/index.js"
     }
   },
