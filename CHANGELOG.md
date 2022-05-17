@@ -1,3 +1,10 @@
+### [1.0.2](https://github.com/achingbrain/nat-port-mapper/compare/v1.0.1...v1.0.2) (2022-05-17)
+
+
+### Bug Fixes
+
+* update xml2js parser options ([#2](https://github.com/achingbrain/nat-port-mapper/issues/2)) ([#13](https://github.com/achingbrain/nat-port-mapper/issues/13)) ([389c2f2](https://github.com/achingbrain/nat-port-mapper/commit/389c2f2ecfad84ae61ee4f6dc3d457c32f3b2e77))
+
 ### [1.0.1](https://github.com/achingbrain/upnp-nat/compare/v1.0.0...v1.0.1) (2022-03-11)
 
 

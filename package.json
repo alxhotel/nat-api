@@ -1,6 +1,6 @@
 {
   "name": "@achingbrain/nat-port-mapper",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Port mapping with UPnP and NAT-PMP",
   "license": "Apache-2.0 OR MIT",
   "homepage": "https://github.com/achingbrain/nat-port-mapper#readme",
