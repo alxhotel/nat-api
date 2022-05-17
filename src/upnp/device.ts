@@ -51,8 +51,8 @@ export class Device {
   </s:Body>
 </s:Envelope>`
 
-    log.trace('POST', info.controlURL)
-    log.trace(requestBody)
+    log.trace('-> POST', info.controlURL)
+    log.trace('->', requestBody)
 
     const text = await fetchXML(new URL(info.controlURL), {
       method: 'POST',
@@ -64,7 +64,13 @@ export class Device {
       body: requestBody
     })
 
-    const parser = new xml2js.Parser()
+    log.trace('<-', text)
+
+    const parser = new xml2js.Parser({
+      explicitRoot: false,
+      explicitArray: false,
+      attrkey: '@'
+    })
     const responseBody = await parser.parseStringPromise(text)
 
     const soapns = this.getNamespace(

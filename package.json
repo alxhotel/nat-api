@@ -3,13 +3,13 @@
   "version": "1.0.1",
   "description": "Port mapping with UPnP and NAT-PMP",
   "license": "Apache-2.0 OR MIT",
-  "homepage": "https://github.com/achingbrain/upnp-nat#readme",
+  "homepage": "https://github.com/achingbrain/nat-port-mapper#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/achingbrain/upnp-nat.git"
+    "url": "git+https://github.com/achingbrain/nat-port-mapper.git"
   },
   "bugs": {
-    "url": "https://github.com/achingbrain/upnp-nat/issues"
+    "url": "https://github.com/achingbrain/nat-port-mapper/issues"
   },
   "keywords": [
     "api",
@@ -129,14 +129,11 @@
     ]
   },
   "scripts": {
+    "clean": "aegir clean",
     "lint": "aegir lint",
-    "dep-check": "aegir dep-check dist/src/**/*.js dist/test/**/*.js",
-    "build": "tsc",
-    "pretest": "npm run build",
-    "test": "aegir test -f ./dist/test/*.js -f ./dist/test/**/*.js",
-    "test:node": "npm run test -- -t node --cov",
-    "test:electron-main": "npm run test -- -t electron-main",
-    "release": "semantic-release"
+    "dep-check": "aegir dep-check",
+    "build": "aegir build --no-bundle",
+    "release": "aegir release"
   },
   "dependencies": {
     "@achingbrain/ssdp": "^3.0.1",
@@ -146,12 +143,11 @@
     "it-first": "^1.0.7",
     "p-defer": "^4.0.0",
     "p-timeout": "^5.0.2",
-    "undici": "^4.14.1",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "@types/default-gateway": "^3.0.1",
     "@types/xml2js": "^0.4.9",
-    "aegir": "^36.1.3"
+    "aegir": "^37.0.15"
   }
 }
