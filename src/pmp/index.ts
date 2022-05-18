@@ -5,8 +5,7 @@ import errCode from 'err-code'
 import defer, { DeferredPromise } from 'p-defer'
 import type { Socket, RemoteInfo } from 'dgram'
 import type { Client, MapPortOptions, UnmapPortOptions } from '../index.js'
-import type { Service } from '@achingbrain/ssdp'
-import type { InternetGatewayDevice } from '../upnp/device.js'
+import type { DiscoverGateway } from '../discovery/index.js'
 
 const debug = logger('nat-port-mapper:pmp')
 
@@ -46,14 +45,15 @@ export class PMPClient extends EventEmitter implements Client {
   private listening: boolean
   private req: any
   private reqActive: boolean
-  private readonly discoverGateway: () => Promise<Service<InternetGatewayDevice>>
+  private readonly discoverGateway: () => DiscoverGateway
   private gateway?: string
+  private cancelGatewayDiscovery?: () => Promise<void>
 
-  static async createClient (discoverGateway: () => Promise<Service<InternetGatewayDevice>>) {
+  static async createClient (discoverGateway: () => DiscoverGateway) {
     return new PMPClient(discoverGateway)
   }
 
-  constructor (discoverGateway: () => Promise<Service<InternetGatewayDevice>>) {
+  constructor (discoverGateway: () => DiscoverGateway) {
     super()
 
     if (discoverGateway == null) {
@@ -99,7 +99,12 @@ export class PMPClient extends EventEmitter implements Client {
         throw new Error('"type" must be either "tcp" or "udp"')
     }
 
-    const gateway = await this.discoverGateway()
+    const discoverGateway = this.discoverGateway()
+    this.cancelGatewayDiscovery = discoverGateway.cancel
+
+    const gateway = await discoverGateway.gateway()
+    this.cancelGatewayDiscovery = undefined
+
     this.gateway = new URL(gateway.location).host
 
     const deferred = defer()
@@ -123,7 +128,12 @@ export class PMPClient extends EventEmitter implements Client {
   async externalIp () {
     debug('Client#externalIp()')
 
-    const gateway = await this.discoverGateway()
+    const discoverGateway = this.discoverGateway()
+    this.cancelGatewayDiscovery = discoverGateway.cancel
+
+    const gateway = await discoverGateway.gateway()
+    this.cancelGatewayDiscovery = undefined
+
     this.gateway = new URL(gateway.location).host
 
     const deferred = defer<string>()
@@ -145,6 +155,10 @@ export class PMPClient extends EventEmitter implements Client {
     this.listening = false
     this.req = null
     this.reqActive = false
+
+    if (this.cancelGatewayDiscovery != null) {
+      await this.cancelGatewayDiscovery()
+    }
   }
 
   /**

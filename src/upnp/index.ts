@@ -1,19 +1,20 @@
-import { Device, InternetGatewayDevice } from './device.js'
-import type { Service } from '@achingbrain/ssdp'
+import { Device } from './device.js'
 import type { Client, MapPortOptions, UnmapPortOptions } from '../index.js'
 import { logger } from '@libp2p/logger'
+import type { DiscoverGateway } from '../discovery/index.js'
 
 const log = logger('nat-port-mapper:upnp')
 
 export class UPNPClient implements Client {
   private closed: boolean
-  private readonly discoverGateway: () => Promise<Service<InternetGatewayDevice>>
+  private readonly discoverGateway: () => DiscoverGateway
+  private cancelGatewayDiscovery?: () => Promise<void>
 
-  static async createClient (discoverGateway: () => Promise<Service<InternetGatewayDevice>>) {
+  static async createClient (discoverGateway: () => DiscoverGateway) {
     return new UPNPClient(discoverGateway)
   }
 
-  constructor (discoverGateway: () => Promise<Service<InternetGatewayDevice>>) {
+  constructor (discoverGateway: () => DiscoverGateway) {
     this.discoverGateway = discoverGateway
     this.closed = false
   }
@@ -94,12 +95,21 @@ export class UPNPClient implements Client {
       throw new Error('client is closed')
     }
 
-    const service = await this.discoverGateway()
+    const discovery = this.discoverGateway()
+    this.cancelGatewayDiscovery = discovery.cancel
+
+    const service = await discovery.gateway()
+
+    this.cancelGatewayDiscovery = undefined
 
     return new Device(service)
   }
 
   async close () {
     this.closed = true
+
+    if (this.cancelGatewayDiscovery != null) {
+      await this.cancelGatewayDiscovery()
+    }
   }
 }

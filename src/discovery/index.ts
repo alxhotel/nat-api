@@ -7,6 +7,11 @@ import type { InternetGatewayDevice } from '../upnp/device'
 
 const log = logger('nat-port-mapper:discovery')
 
+export interface DiscoverGateway {
+  gateway: () => Promise<Service<InternetGatewayDevice>>
+  cancel: () => Promise<void>
+}
+
 export interface DiscoveryOptions {
   /**
    * Do not search the network for a gateway, use this instead
@@ -28,64 +33,84 @@ const ST = 'urn:schemas-upnp-org:device:InternetGatewayDevice:1'
 const ONE_MINUTE = 60000
 const ONE_HOUR = ONE_MINUTE * 60
 
-export function discoverGateway (options: DiscoveryOptions = {}): () => Promise<Service<InternetGatewayDevice>> {
-  const timeout = options.timeout ?? ONE_HOUR
-  const discoveryTimeout = options.discoveryTimeout ?? ONE_MINUTE
-  let service: Service<InternetGatewayDevice>
-  let expires: number
-  let discovery: SSDP
+export function discoverGateway (options: DiscoveryOptions = {}): () => DiscoverGateway {
+  return () => {
+    const timeout = options.timeout ?? ONE_HOUR
+    const discoveryTimeout = options.discoveryTimeout ?? ONE_MINUTE
+    let service: Service<InternetGatewayDevice>
+    let expires: number
+    let discovery: SSDP
+    let clear: (() => void) | undefined
 
-  return async () => {
-    if (service != null && !(expires < Date.now())) {
-      return service
-    }
+    const discover: DiscoverGateway = {
+      gateway: async () => {
+        if (service != null && !(expires < Date.now())) {
+          return service
+        }
 
-    if (options.gateway != null) {
-      log('Using overridden gateway address %s', options.gateway)
+        if (options.gateway != null) {
+          log('Using overridden gateway address %s', options.gateway)
 
-      if (!options.gateway.startsWith('http')) {
-        options.gateway = `http://${options.gateway}`
-      }
-
-      expires = Date.now() + timeout
-
-      service = {
-        location: new URL(options.gateway),
-        details: {
-          device: {
-            serviceList: {
-              service: []
-            },
-            deviceList: {
-              device: []
-            }
+          if (!options.gateway.startsWith('http')) {
+            options.gateway = `http://${options.gateway}`
           }
-        },
-        expires,
-        serviceType: ST,
-        uniqueServiceName: 'unknown'
+
+          expires = Date.now() + timeout
+
+          service = {
+            location: new URL(options.gateway),
+            details: {
+              device: {
+                serviceList: {
+                  service: []
+                },
+                deviceList: {
+                  device: []
+                }
+              }
+            },
+            expires,
+            serviceType: ST,
+            uniqueServiceName: 'unknown'
+          }
+        } else {
+          if (discovery == null) {
+            discovery = await ssdp()
+          }
+
+          log('Discovering gateway')
+          const clearable = pTimeout(
+            first(discovery.discover<InternetGatewayDevice>(ST)),
+            discoveryTimeout
+          )
+
+          clear = clearable.clear
+
+          const result = await clearable
+
+          if (result == null) {
+            throw new Error('Could not discover gateway')
+          }
+
+          log('Discovered gateway %s', result.location)
+
+          service = result
+          expires = Date.now() + timeout
+        }
+
+        return service
+      },
+      cancel: async () => {
+        if (discovery != null) {
+          await discovery.stop()
+        }
+
+        if (clear != null) {
+          await clear()
+        }
       }
-    } else {
-      if (discovery == null) {
-        discovery = await ssdp()
-      }
-
-      log('Discovering gateway')
-      const result = await pTimeout(
-        first(discovery.discover<InternetGatewayDevice>(ST)),
-        discoveryTimeout
-      )
-
-      if (result == null) {
-        throw new Error('Could not discover gateway')
-      }
-
-      log('Discovered gateway %s', result.location)
-
-      service = result
-      expires = Date.now() + timeout
     }
 
-    return service
+    return discover
   }
 }

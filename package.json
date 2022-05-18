@@ -133,7 +133,9 @@
     "lint": "aegir lint",
     "dep-check": "aegir dep-check",
     "build": "aegir build --no-bundle",
-    "release": "aegir release"
+    "release": "aegir release",
+    "test": "aegir test",
+    "test:node": "aegir test -t node"
   },
   "dependencies": {
     "@achingbrain/ssdp": "^3.0.1",
