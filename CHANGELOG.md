@@ -1,3 +1,10 @@
+### [1.0.4](https://github.com/achingbrain/nat-port-mapper/compare/v1.0.3...v1.0.4) (2022-05-19)
+
+
+### Bug Fixes
+
+* cache resolved gateway until timeout ([#15](https://github.com/achingbrain/nat-port-mapper/issues/15)) ([1ad50c3](https://github.com/achingbrain/nat-port-mapper/commit/1ad50c34a1a5889bc3271073d85abdfe3e565b1f)), closes [#14](https://github.com/achingbrain/nat-port-mapper/issues/14)
+
 ### [1.0.3](https://github.com/achingbrain/nat-port-mapper/compare/v1.0.2...v1.0.3) (2022-05-18)
 
 
