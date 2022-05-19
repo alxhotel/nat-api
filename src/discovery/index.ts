@@ -34,11 +34,12 @@ const ONE_MINUTE = 60000
 const ONE_HOUR = ONE_MINUTE * 60
 
 export function discoverGateway (options: DiscoveryOptions = {}): () => DiscoverGateway {
+  const timeout = options.timeout ?? ONE_HOUR
+  const discoveryTimeout = options.discoveryTimeout ?? ONE_MINUTE
+  let service: Service<InternetGatewayDevice>
+  let expires: number
+
   return () => {
-    const timeout = options.timeout ?? ONE_HOUR
-    const discoveryTimeout = options.discoveryTimeout ?? ONE_MINUTE
-    let service: Service<InternetGatewayDevice>
-    let expires: number
     let discovery: SSDP
     let clear: (() => void) | undefined
 
