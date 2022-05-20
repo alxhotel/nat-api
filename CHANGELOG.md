@@ -1,3 +1,10 @@
+### [1.0.5](https://github.com/achingbrain/nat-port-mapper/compare/v1.0.4...v1.0.5) (2022-05-20)
+
+
+### Bug Fixes
+
+* add error listener to ssdp ([#16](https://github.com/achingbrain/nat-port-mapper/issues/16)) ([afafb69](https://github.com/achingbrain/nat-port-mapper/commit/afafb6993bbfc62030091ad7099e464035282168))
+
 ### [1.0.4](https://github.com/achingbrain/nat-port-mapper/compare/v1.0.3...v1.0.4) (2022-05-19)
 
 
