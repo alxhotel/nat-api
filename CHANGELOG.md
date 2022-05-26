@@ -1,3 +1,10 @@
+### [1.0.6](https://github.com/achingbrain/nat-port-mapper/compare/v1.0.5...v1.0.6) (2022-05-26)
+
+
+### Bug Fixes
+
+* shut down cleanly ([#17](https://github.com/achingbrain/nat-port-mapper/issues/17)) ([8a157c4](https://github.com/achingbrain/nat-port-mapper/commit/8a157c4223ac1d19b5d05d6ef3372a0e129ff790))
+
 ### [1.0.5](https://github.com/achingbrain/nat-port-mapper/compare/v1.0.4...v1.0.5) (2022-05-20)
 
 
