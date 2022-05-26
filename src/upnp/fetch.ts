@@ -8,19 +8,22 @@ export interface RequestInit {
   method: 'POST' | 'GET'
   headers: Record<string, string>
   body: Buffer | string
+  signal: AbortSignal
 }
 
 function initRequest (url: URL, init: RequestInit) {
   if (url.protocol === 'http:') {
     return http.request(url, {
       method: init.method,
-      headers: init.headers
+      headers: init.headers,
+      signal: init.signal
     })
   } else if (url.protocol === 'https:') {
     return https.request(url, {
       method: init.method,
       headers: init.headers,
-      rejectUnauthorized: false
+      rejectUnauthorized: false,
+      signal: init.signal
     })
   } else {
     throw new Error('Invalid protocol ' + url.protocol)

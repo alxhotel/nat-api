@@ -9,6 +9,7 @@ export class UPNPClient implements Client {
   private closed: boolean
   private readonly discoverGateway: () => DiscoverGateway
   private cancelGatewayDiscovery?: () => Promise<void>
+  private readonly abortController: AbortController
 
   static async createClient (discoverGateway: () => DiscoverGateway) {
     return new UPNPClient(discoverGateway)
@@ -17,6 +18,9 @@ export class UPNPClient implements Client {
   constructor (discoverGateway: () => DiscoverGateway) {
     this.discoverGateway = discoverGateway
     this.closed = false
+
+    // used to terminate network operations on shutdown
+    this.abortController = new AbortController()
   }
 
   async map (options: MapPortOptions) {
@@ -48,7 +52,7 @@ export class UPNPClient implements Client {
       ['NewPortMappingDescription', description],
       ['NewLeaseDuration', ttl],
       ['NewProtocol', options.protocol]
-    ])
+    ], this.abortController.signal)
   }
 
   async unmap (options: UnmapPortOptions) {
@@ -61,7 +65,7 @@ export class UPNPClient implements Client {
     await gateway.run('DeletePortMapping', [
       ['NewExternalPort', options.publicPort],
       ['NewProtocol', options.protocol]
-    ])
+    ], this.abortController.signal)
   }
 
   async externalIp (): Promise<string> {
@@ -72,7 +76,7 @@ export class UPNPClient implements Client {
     log('Discover external IP address')
 
     const gateway = await this.findGateway()
-    const data = await gateway.run('GetExternalIPAddress', [])
+    const data = await gateway.run('GetExternalIPAddress', [], this.abortController.signal)
 
     let key = null
     Object.keys(data).some(function (k) {
@@ -107,6 +111,8 @@ export class UPNPClient implements Client {
 
   async close () {
     this.closed = true
+
+    this.abortController.abort()
 
     if (this.cancelGatewayDiscovery != null) {
       await this.cancelGatewayDiscovery()

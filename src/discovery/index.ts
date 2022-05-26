@@ -76,10 +76,13 @@ export function discoverGateway (options: DiscoveryOptions = {}): () => Discover
           }
         } else {
           if (discovery == null) {
-            discovery = await ssdp()
+            discovery = await ssdp({
+              start: false
+            })
             discovery.on('error', (err) => {
               log.error('ssdp error', err)
             })
+            await discovery.start()
           }
 
           log('Discovering gateway')

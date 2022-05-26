@@ -39,7 +39,7 @@ export class Device {
     ]
   }
 
-  async run (action: string, args: Array<[string, string | number]>) {
+  async run (action: string, args: Array<[string, string | number]>, signal: AbortSignal) {
     const info = this.getService(this.services)
 
     const requestBody = `<?xml version="1.0"?>
@@ -61,7 +61,8 @@ export class Device {
         'Content-Length': requestBody.length.toString(),
         SOAPAction: JSON.stringify(info.service + '#' + action)
       },
-      body: requestBody
+      body: requestBody,
+      signal
     })
 
     log.trace('<-', text)
