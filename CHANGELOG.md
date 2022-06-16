@@ -1,3 +1,10 @@
+## [1.0.7](https://github.com/achingbrain/nat-port-mapper/compare/v1.0.6...v1.0.7) (2022-06-16)
+
+
+### Trivial Changes
+
+* **deps:** bump @libp2p/logger from 1.1.6 to 2.0.0 ([#18](https://github.com/achingbrain/nat-port-mapper/issues/18)) ([22a9b05](https://github.com/achingbrain/nat-port-mapper/commit/22a9b059a23abb649d5658c272a5b067bc971261))
+
 ### [1.0.6](https://github.com/achingbrain/nat-port-mapper/compare/v1.0.5...v1.0.6) (2022-05-26)
 
 
