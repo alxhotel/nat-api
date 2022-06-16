@@ -139,7 +139,7 @@
   },
   "dependencies": {
     "@achingbrain/ssdp": "^4.0.1",
-    "@libp2p/logger": "^1.0.4",
+    "@libp2p/logger": "^2.0.0",
     "default-gateway": "^6.0.2",
     "err-code": "^3.0.1",
     "it-first": "^1.0.7",
