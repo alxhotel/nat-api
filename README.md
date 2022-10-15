@@ -1,7 +1,7 @@
 # nat-api
 
 [![NPM Version][nat-api-ni]][nat-api-nu]
-[![Build Status][nat-api-ti]][nat-api-tu]
+[![Build Status][nat-api-bi]][nat-api-bu]
 [![Dependency Status][nat-api-di]][nat-api-du]
 [![Standard - Javascript Style Guide][standard-image]][standard-url]
 
@@ -131,11 +131,11 @@ Destroy the client. Unmaps all the ports open with `nat-api` and cleans up large
 
 MIT. Copyright (c) [Alex](https://github.com/alxhotel)
 
-[nat-api-ti]: https://img.shields.io/travis/com/alxhotel/nat-api/master.svg
-[nat-api-tu]: https://travis-ci.com/alxhotel/nat-api
 [nat-api-ni]: https://img.shields.io/npm/v/nat-api.svg
 [nat-api-nu]: https://npmjs.org/package/nat-api
-[nat-api-di]: https://david-dm.org/alxhotel/nat-api/status.svg
-[nat-api-du]: https://david-dm.org/alxhotel/nat-api
+[nat-api-bi]: https://img.shields.io/github/workflow/status/alxhotel/nat-api/ci/master
+[nat-api-bu]: https://github.com/alxhotel/nat-api/actions
+[nat-api-di]: https://img.shields.io/librariesio/release/npm/nat-api
+[nat-api-du]: https://libraries.io/npm/nat-api
 [standard-image]: https://img.shields.io/badge/code_style-standard-brightgreen.svg
 [standard-url]: https://standardjs.com
