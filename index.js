@@ -213,7 +213,7 @@ class NatAPI {
     opts.ttl = opts.ttl || this.ttl
     opts.gateway = opts.gateway || this.gateway
 
-    return { opts: opts, cb: cb }
+    return { opts, cb }
   }
 
   _map (opts, cb) {
