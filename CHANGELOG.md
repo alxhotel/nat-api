@@ -1,3 +1,12 @@
+## [1.0.8](https://github.com/achingbrain/nat-port-mapper/compare/v1.0.7...v1.0.8) (2023-04-27)
+
+
+### Trivial Changes
+
+* **deps:** bump it-first from 1.0.7 to 3.0.1 ([#35](https://github.com/achingbrain/nat-port-mapper/issues/35)) ([7cb683d](https://github.com/achingbrain/nat-port-mapper/commit/7cb683d4dc163da9619137e3e8278283b558ad1c))
+* **deps:** bump xml2js from 0.4.23 to 0.5.0 ([#37](https://github.com/achingbrain/nat-port-mapper/issues/37)) ([4abf459](https://github.com/achingbrain/nat-port-mapper/commit/4abf459c36afcdd17e545e7a3346c65e921f4f60))
+* **deps:** Updated xml2js to 0.5.0 to patch CVE-2023-0842 ([#36](https://github.com/achingbrain/nat-port-mapper/issues/36)) ([432fd61](https://github.com/achingbrain/nat-port-mapper/commit/432fd61775a46ff343726cf3296511863c7de8bd))
+
 ## [1.0.7](https://github.com/achingbrain/nat-port-mapper/compare/v1.0.6...v1.0.7) (2022-06-16)
 
 
