@@ -31,14 +31,15 @@
   "types": "./dist/src/index.d.ts",
   "files": [
     "src",
-    "dist/src",
+    "dist",
     "!dist/test",
     "!**/*.tsbuildinfo"
   ],
   "exports": {
     ".": {
-      "browser": "./dist/src/browser.js",
-      "import": "./dist/src/index.js"
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "browser": "./dist/src/browser.js"
     }
   },
   "eslintConfig": {
@@ -74,15 +75,15 @@
               "release": "patch"
             },
             {
-              "type": "chore",
-              "release": "patch"
-            },
-            {
               "type": "docs",
               "release": "patch"
             },
             {
               "type": "test",
+              "release": "patch"
+            },
+            {
+              "type": "deps",
               "release": "patch"
             },
             {
@@ -112,7 +113,11 @@
               },
               {
                 "type": "docs",
-                "section": "Trivial Changes"
+                "section": "Documentation"
+              },
+              {
+                "type": "deps",
+                "section": "Dependencies"
               },
               {
                 "type": "test",
@@ -150,6 +155,6 @@
   "devDependencies": {
     "@types/default-gateway": "^3.0.1",
     "@types/xml2js": "^0.4.11",
-    "aegir": "^37.0.15"
+    "aegir": "^39.0.1"
   }
 }

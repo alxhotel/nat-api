@@ -1,6 +1,6 @@
-import { fetchXML } from './fetch.js'
-import xml2js from 'xml2js'
 import { logger } from '@libp2p/logger'
+import xml2js from 'xml2js'
+import { fetchXML } from './fetch.js'
 import type { Service } from '@achingbrain/ssdp'
 
 const log = logger('nat-port-mapper:upnp:device')
@@ -26,6 +26,17 @@ interface GatewayService {
   eventSubURL: string
 }
 
+interface ServiceDescription {
+  services: GatewayService[]
+  devices: GatewayDevice[]
+}
+
+interface ServiceInfo {
+  service: string
+  SCPDURL: string
+  controlURL: string
+}
+
 export class Device {
   private readonly service: Service<InternetGatewayDevice>
   private readonly services: string[]
@@ -39,7 +50,7 @@ export class Device {
     ]
   }
 
-  async run (action: string, args: Array<[string, string | number]>, signal: AbortSignal) {
+  async run (action: string, args: Array<[string, string | number]>, signal: AbortSignal): Promise<any> {
     const info = this.getService(this.services)
 
     const requestBody = `<?xml version="1.0"?>
@@ -82,7 +93,7 @@ export class Device {
     return responseBody[soapns + 'Body']
   }
 
-  getService (types: string[]) {
+  getService (types: string[]): ServiceInfo {
     const [service] = this.parseDescription(this.service.details).services
       .filter(function (service) {
         return types.includes(service.serviceType)
@@ -94,7 +105,7 @@ export class Device {
     }
 
     const base = new URL(this.service.location)
-    function addPrefix (u: string) {
+    function addPrefix (u: string): string {
       let uri: URL
       try {
         uri = new URL(u)
@@ -116,7 +127,7 @@ export class Device {
     }
   }
 
-  parseDescription (info: Record<string, any>) {
+  parseDescription (info: Record<string, any>): ServiceDescription {
     const services: GatewayService[] = []
     const devices: GatewayDevice[] = []
 
@@ -124,7 +135,7 @@ export class Device {
       return Array.isArray(item) ? item : [item]
     }
 
-    function traverseServices (service: GatewayService) {
+    function traverseServices (service: GatewayService): void {
       if (service == null) {
         return
       }
@@ -132,7 +143,7 @@ export class Device {
       services.push(service)
     }
 
-    function traverseDevices (device: GatewayDevice) {
+    function traverseDevices (device: GatewayDevice): void {
       if (device == null) {
         return
       }
@@ -151,12 +162,12 @@ export class Device {
     traverseDevices(info.device)
 
     return {
-      services: services,
-      devices: devices
+      services,
+      devices
     }
   }
 
-  getNamespace (data: any, uri: string) {
+  getNamespace (data: any, uri: string): string {
     let ns: string | undefined
 
     if (data['@'] != null) {

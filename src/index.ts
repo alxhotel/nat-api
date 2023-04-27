@@ -1,9 +1,9 @@
-import defaultGateway from 'default-gateway'
-import { logger } from '@libp2p/logger'
-import { UPNPClient } from './upnp/index.js'
-import { PMPClient } from './pmp/index.js'
-import { discoverGateway } from './discovery/index.js'
 import os from 'os'
+import { logger } from '@libp2p/logger'
+import defaultGateway from 'default-gateway'
+import { discoverGateway } from './discovery/index.js'
+import { PMPClient } from './pmp/index.js'
+import { UPNPClient } from './upnp/index.js'
 
 const log = logger('nat-port-mapper')
 
@@ -66,7 +66,7 @@ export class NatAPI {
     this.openPorts = []
   }
 
-  async map (options?: Partial<MapPortOptions>) {
+  async map (options?: Partial<MapPortOptions>): Promise<void> {
     if (this.destroyed) {
       throw new Error('client is destroyed')
     }
@@ -91,7 +91,7 @@ export class NatAPI {
     log('Port %d:%d for protocol %s mapped on router', opts.publicPort, opts.localPort, opts.protocol)
   }
 
-  async unmap (options: Partial<UnmapPortOptions>) {
+  async unmap (options: Partial<UnmapPortOptions>): Promise<void> {
     if (this.destroyed) {
       throw new Error('client is destroyed')
     }
@@ -113,7 +113,7 @@ export class NatAPI {
     log('Port %d:%d for protocol %s unmapped on router', opts.publicPort, opts.localPort, opts.protocol)
   }
 
-  async close () {
+  async close (): Promise<void> {
     if (this.destroyed) {
       throw new Error('client already closed')
     }
@@ -131,7 +131,7 @@ export class NatAPI {
 
     // Unmap all ports
     await Promise.all(
-      this.openPorts.map(async opts => await this.unmap(opts))
+      this.openPorts.map(async opts => this.unmap(opts))
     )
   }
 
@@ -153,12 +153,12 @@ export class NatAPI {
     return output
   }
 
-  async externalIp () {
-    return await this.client.externalIp()
+  async externalIp (): Promise<string> {
+    return this.client.externalIp()
   }
 }
 
-function findLocalAddress () {
+function findLocalAddress (): string {
   const interfaces = os.networkInterfaces()
 
   for (const infos of Object.values(interfaces)) {
@@ -183,14 +183,14 @@ function findLocalAddress () {
   throw new Error('Please pass a `localAddress` to the map function')
 }
 
-export async function upnpNat (options: Partial<NatAPIOptions> = {}) {
-  const client = await UPNPClient.createClient(discoverGateway(options))
+export function upnpNat (options: Partial<NatAPIOptions> = {}): NatAPI {
+  const client = UPNPClient.createClient(discoverGateway(options))
 
   return new NatAPI(options, client)
 }
 
-export async function pmpNat (options: Partial<NatAPIOptions> = {}) {
-  const client = await PMPClient.createClient(discoverGateway({
+export async function pmpNat (options: Partial<NatAPIOptions> = {}): Promise<NatAPI> {
+  const client = PMPClient.createClient(discoverGateway({
     ...options,
     gateway: (await defaultGateway.v4()).gateway
   }))

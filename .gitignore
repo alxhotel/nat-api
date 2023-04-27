@@ -1,5 +1,9 @@
-# NodeJS
+node_modules
+build
+dist
+.docs
+.coverage
 node_modules
 package-lock.json
-dist
-*.log
+yarn.lock
+.vscode

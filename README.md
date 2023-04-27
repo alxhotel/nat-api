@@ -1,14 +1,23 @@
-# @achingbrain/nat-port-mapper
+# @achingbrain/nat-port-mapper <!-- omit in toc -->
 
-[![Build Status](https://github.com/achingbrain/nat-port-mapper/actions/workflows/js-test-and-release.yml/badge.svg?branch=master)](https://github.com/achingbrain/nat-port-mapper/actions/workflows/js-test-and-release.yml)
-[![Coverage Status](https://coveralls.io/repos/achingbrain/nat-port-mapper/badge.svg?branch=master&service=github)](https://coveralls.io/github/achingbrain/ssdp?branch=master)
+[![codecov](https://img.shields.io/codecov/c/github/achingbrain/nat-port-mapper.svg?style=flat-square)](https://codecov.io/gh/achingbrain/nat-port-mapper)
+[![CI](https://img.shields.io/github/actions/workflow/status/achingbrain/nat-port-mapper/js-test-and-release.yml?branch=master\&style=flat-square)](https://github.com/achingbrain/nat-port-mapper/actions/workflows/js-test-and-release.yml?query=branch%3Amaster)
 
-> Fast port mapping with **UPnP** and **NAT-PMP** in NodeJS
+> Port mapping with UPnP and NAT-PMP
+
+## Table of contents <!-- omit in toc -->
+
+- [Install](#install)
+- [Usage](#usage)
+- [Credits](#credits)
+- [Additional Information](#additional-information)
+- [License](#license)
+- [Contribution](#contribution)
 
 ## Install
 
-```sh
-npm install nat-api
+```console
+$ npm i @achingbrain/nat-port-mapper
 ```
 
 ## Usage
@@ -58,10 +67,17 @@ Based on [alxhotel/nat-api](https://github.com/alxhotel/nat-api)
 
 ## Additional Information
 
-- http://miniupnp.free.fr/nat-pmp.html
-- http://wikipedia.org/wiki/NAT_Port_Mapping_Protocol
-- http://tools.ietf.org/html/draft-cheshire-nat-pmp-03
+- <http://miniupnp.free.fr/nat-pmp.html>
+- <http://wikipedia.org/wiki/NAT_Port_Mapping_Protocol>
+- <http://tools.ietf.org/html/draft-cheshire-nat-pmp-03>
 
 ## License
 
-[Apache-2.0](LICENSE-APACHE) or [MIT](LICENSE-MIT) © Protocol Labs
+Licensed under either of
+
+- Apache 2.0, ([LICENSE-APACHE](LICENSE-APACHE) / <http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT ([LICENSE-MIT](LICENSE-MIT) / <http://opensource.org/licenses/MIT>)
+
+## Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.

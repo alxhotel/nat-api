@@ -1,7 +1,7 @@
-import { Device } from './device.js'
-import type { Client, MapPortOptions, UnmapPortOptions } from '../index.js'
 import { logger } from '@libp2p/logger'
+import { Device } from './device.js'
 import type { DiscoverGateway } from '../discovery/index.js'
+import type { Client, MapPortOptions, UnmapPortOptions } from '../index.js'
 
 const log = logger('nat-port-mapper:upnp')
 
@@ -11,7 +11,7 @@ export class UPNPClient implements Client {
   private cancelGatewayDiscovery?: () => Promise<void>
   private readonly abortController: AbortController
 
-  static async createClient (discoverGateway: () => DiscoverGateway) {
+  static createClient (discoverGateway: () => DiscoverGateway): UPNPClient {
     return new UPNPClient(discoverGateway)
   }
 
@@ -23,7 +23,7 @@ export class UPNPClient implements Client {
     this.abortController = new AbortController()
   }
 
-  async map (options: MapPortOptions) {
+  async map (options: MapPortOptions): Promise<void> {
     if (this.closed) {
       throw new Error('client is closed')
     }
@@ -55,7 +55,7 @@ export class UPNPClient implements Client {
     ], this.abortController.signal)
   }
 
-  async unmap (options: UnmapPortOptions) {
+  async unmap (options: UnmapPortOptions): Promise<void> {
     if (this.closed) {
       throw new Error('client is closed')
     }
@@ -109,7 +109,7 @@ export class UPNPClient implements Client {
     return new Device(service)
   }
 
-  async close () {
+  async close (): Promise<void> {
     this.closed = true
 
     this.abortController.abort()

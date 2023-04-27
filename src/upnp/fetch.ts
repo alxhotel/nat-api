@@ -1,6 +1,6 @@
-import { logger } from '@libp2p/logger'
 import http from 'http'
 import https from 'https'
+import { logger } from '@libp2p/logger'
 
 const log = logger('nat-port-mapper:upnp:fetch')
 
@@ -11,7 +11,7 @@ export interface RequestInit {
   signal: AbortSignal
 }
 
-function initRequest (url: URL, init: RequestInit) {
+function initRequest (url: URL, init: RequestInit): http.ClientRequest {
   if (url.protocol === 'http:') {
     return http.request(url, {
       method: init.method,
@@ -31,7 +31,7 @@ function initRequest (url: URL, init: RequestInit) {
 }
 
 export async function fetchXML (url: URL, init: RequestInit): Promise<string> {
-  return await new Promise<string>((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     const request = initRequest(url, init)
 
     if (init.body != null) {
@@ -57,7 +57,7 @@ export async function fetchXML (url: URL, init: RequestInit): Promise<string> {
       }
 
       if (response.headers['content-type'] != null && !response.headers['content-type'].includes('/xml')) {
-        return reject(new Error('Bad content type ' + response.headers['content-type']))
+        reject(new Error('Bad content type ' + response.headers['content-type'])); return
       }
 
       let body = ''

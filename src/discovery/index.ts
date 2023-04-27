@@ -1,9 +1,9 @@
-import type { Service, SSDP } from '@achingbrain/ssdp'
-import first from 'it-first'
-import pTimeout from 'p-timeout'
 import ssdp from '@achingbrain/ssdp'
 import { logger } from '@libp2p/logger'
+import first from 'it-first'
+import pTimeout from 'p-timeout'
 import type { InternetGatewayDevice } from '../upnp/device'
+import type { Service, SSDP } from '@achingbrain/ssdp'
 
 const log = logger('nat-port-mapper:discovery')
 
@@ -113,7 +113,7 @@ export function discoverGateway (options: DiscoveryOptions = {}): () => Discover
         }
 
         if (clear != null) {
-          await clear()
+          clear()
         }
       }
     }

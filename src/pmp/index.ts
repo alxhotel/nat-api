@@ -1,11 +1,11 @@
 import { createSocket } from 'dgram'
-import { logger } from '@libp2p/logger'
 import { EventEmitter } from 'events'
+import { logger } from '@libp2p/logger'
 import errCode from 'err-code'
-import defer, { DeferredPromise } from 'p-defer'
-import type { Socket, RemoteInfo } from 'dgram'
-import type { Client, MapPortOptions, UnmapPortOptions } from '../index.js'
+import defer, { type DeferredPromise } from 'p-defer'
 import type { DiscoverGateway } from '../discovery/index.js'
+import type { Client, MapPortOptions, UnmapPortOptions } from '../index.js'
+import type { Socket, RemoteInfo } from 'dgram'
 
 const debug = logger('nat-port-mapper:pmp')
 
@@ -49,7 +49,7 @@ export class PMPClient extends EventEmitter implements Client {
   private gateway?: string
   private cancelGatewayDiscovery?: () => Promise<void>
 
-  static async createClient (discoverGateway: () => DiscoverGateway) {
+  static createClient (discoverGateway: () => DiscoverGateway): PMPClient {
     return new PMPClient(discoverGateway)
   }
 
@@ -69,23 +69,23 @@ export class PMPClient extends EventEmitter implements Client {
 
     // Create socket
     this.socket = createSocket({ type: 'udp4', reuseAddr: true })
-    this.socket.on('listening', () => this.onListening())
-    this.socket.on('message', (msg, rinfo) => this.onMessage(msg, rinfo))
-    this.socket.on('close', () => this.onClose())
-    this.socket.on('error', (err) => this.onError(err))
+    this.socket.on('listening', () => { this.onListening() })
+    this.socket.on('message', (msg, rinfo) => { this.onMessage(msg, rinfo) })
+    this.socket.on('close', () => { this.onClose() })
+    this.socket.on('error', (err) => { this.onError(err) })
 
     // Try to connect
     this.connect()
   }
 
-  connect () {
+  connect (): void {
     debug('Client#connect()')
     if (this.connecting) return
     this.connecting = true
     this.socket.bind(CLIENT_PORT)
   }
 
-  async map (opts: MapPortOptions) {
+  async map (opts: MapPortOptions): Promise<void> {
     debug('Client#portMapping()')
     let opcode: number
     switch (String(opts.protocol ?? 'tcp').toLowerCase()) {
@@ -114,7 +114,7 @@ export class PMPClient extends EventEmitter implements Client {
     await deferred.promise
   }
 
-  async unmap (opts: UnmapPortOptions) {
+  async unmap (opts: UnmapPortOptions): Promise<void> {
     debug('Client#portUnmapping()')
 
     await this.map({
@@ -125,7 +125,7 @@ export class PMPClient extends EventEmitter implements Client {
     })
   }
 
-  async externalIp () {
+  async externalIp (): Promise<string> {
     debug('Client#externalIp()')
 
     const discoverGateway = this.discoverGateway()
@@ -140,10 +140,10 @@ export class PMPClient extends EventEmitter implements Client {
 
     this.request(OP_EXTERNAL_IP, {}, deferred)
 
-    return await deferred.promise
+    return deferred.promise
   }
 
-  async close () {
+  async close (): Promise<void> {
     debug('Client#close()')
 
     if (this.socket != null) {
@@ -165,7 +165,7 @@ export class PMPClient extends EventEmitter implements Client {
    * Queues a UDP request to be send to the gateway device.
    */
 
-  request (op: number, obj: PortMappingOptions, deferred: DeferredPromise<any>) {
+  request (op: number, obj: PortMappingOptions, deferred: DeferredPromise<any>): void {
     debug('Client#request()', [op, obj])
 
     let buf
@@ -230,7 +230,7 @@ export class PMPClient extends EventEmitter implements Client {
     // assert.equal(pos, size, 'buffer not fully written!')
 
     // Add it to queue
-    this.queue.push({ op, buf: buf, deferred })
+    this.queue.push({ op, buf, deferred })
 
     // Try to send next message
     this._next()
@@ -239,8 +239,7 @@ export class PMPClient extends EventEmitter implements Client {
   /**
    * Processes the next request if the socket is listening.
    */
-
-  _next () {
+  _next (): void {
     debug('Client#_next()')
 
     const req = this.queue[0]
@@ -279,7 +278,7 @@ export class PMPClient extends EventEmitter implements Client {
     this.socket.send(buf, 0, buf.length, SERVER_PORT, this.gateway)
   }
 
-  onListening () {
+  onListening (): void {
     debug('Client#onListening()')
     this.listening = true
     this.connecting = false
@@ -288,7 +287,7 @@ export class PMPClient extends EventEmitter implements Client {
     this._next()
   }
 
-  onMessage (msg: Buffer, rinfo: RemoteInfo) {
+  onMessage (msg: Buffer, rinfo: RemoteInfo): void {
     // Ignore message if we're not expecting it
     if (this.queue.length === 0) {
       return
@@ -296,7 +295,7 @@ export class PMPClient extends EventEmitter implements Client {
 
     debug('Client#onMessage()', [msg, rinfo])
 
-    const cb = (err?: Error, parsed?: any) => {
+    const cb = (err?: Error, parsed?: any): void => {
       this.req = null
       this.reqActive = false
 
@@ -315,7 +314,7 @@ export class PMPClient extends EventEmitter implements Client {
     }
 
     const req = this.queue[0]
-    const parsed: any = { msg: msg }
+    const parsed: any = { msg }
     parsed.vers = msg.readUInt8(0)
     parsed.op = msg.readUInt8(1)
 
@@ -341,7 +340,7 @@ export class PMPClient extends EventEmitter implements Client {
 
     // Error
     if (parsed.resultCode !== 0) {
-      return cb(errCode(new Error(parsed.resultMessage), parsed.resultCode))
+      cb(errCode(new Error(parsed.resultMessage), parsed.resultCode)); return
     }
 
     // Success
@@ -361,19 +360,19 @@ export class PMPClient extends EventEmitter implements Client {
         parsed.ip.push(msg.readUInt8(11))
         break
       default:
-        return cb(new Error(`Unknown opcode: ${req.op}`))
+      { cb(new Error(`Unknown opcode: ${req.op}`)); return }
     }
 
     cb(undefined, parsed)
   }
 
-  onClose () {
+  onClose (): void {
     debug('Client#onClose()')
     this.listening = false
     this.connecting = false
   }
 
-  onError (err: Error) {
+  onError (err: Error): void {
     debug('Client#onError()', [err])
     if (this.req?.cb != null) {
       this.req.cb(err)

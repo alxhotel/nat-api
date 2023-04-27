@@ -1,4 +1,4 @@
-import { MapPortOptions, upnpNat } from '../src/index.js'
+import { type MapPortOptions, upnpNat } from '../src/index.js'
 
 describe('nat-port-mapper', () => {
   it('should map a port', async () => {
@@ -6,7 +6,7 @@ describe('nat-port-mapper', () => {
       return // CI environments don't have uPNP routers!
     }
 
-    const client = await upnpNat()
+    const client = upnpNat()
     const details: Partial<MapPortOptions> = {
       localPort: 48932,
       protocol: 'TCP'
