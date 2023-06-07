@@ -41,13 +41,13 @@ export interface Client {
 }
 
 export class NatAPI {
+  public openPorts: MapPortOptions[]
   private readonly ttl: number
   private readonly description: string
   private readonly gateway?: string
   private readonly keepAlive: boolean
   private readonly keepAliveInterval: number
   private readonly destroyed: boolean
-  private openPorts: MapPortOptions[]
   private readonly client: Client
   private readonly updateIntervals: Map<string, any>
 
