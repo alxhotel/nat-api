@@ -133,7 +133,7 @@ MIT. Copyright (c) [Alex](https://github.com/alxhotel)
 
 [nat-api-ni]: https://img.shields.io/npm/v/nat-api.svg
 [nat-api-nu]: https://npmjs.org/package/nat-api
-[nat-api-bi]: https://img.shields.io/github/workflow/status/alxhotel/nat-api/ci/master
+[nat-api-bi]: https://img.shields.io/github/actions/workflow/status/alxhotel/nat-api/ci.yml?branch=master
 [nat-api-bu]: https://github.com/alxhotel/nat-api/actions
 [nat-api-di]: https://img.shields.io/librariesio/release/npm/nat-api
 [nat-api-du]: https://libraries.io/npm/nat-api
